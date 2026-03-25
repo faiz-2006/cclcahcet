@@ -3,15 +3,20 @@
 import { BookOpen, BookText, Library, ArrowRight, Calendar, Bell, Users } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { libraryData } from "@/data/library-data"
+import { getLibraryData, getAnnouncements, getLibraryHours, getStatistics } from "@/lib/data-service"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useToast } from "@/components/ui/use-toast"
-import { useEffect } from "react"
+import { useState, useEffect } from "react"
 
 export default function Home() {
   const { toast } = useToast()
+  const [stats, setStats] = useState(libraryData.statistics)
+  const [announcements, setAnnouncements] = useState(libraryData.announcements)
+  const [hours, setHours] = useState(libraryData.hours)
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
     toast({
@@ -19,6 +24,22 @@ export default function Home() {
       description: "Explore our vast collection of resources and services.",
     })
   }, [toast])
+
+  useEffect(() => {
+    // Load data from localStorage on mount
+    const loadData = () => {
+      setStats(getStatistics())
+      setAnnouncements(getAnnouncements())
+      setHours(getLibraryHours())
+      setIsLoaded(true)
+    }
+
+    loadData()
+
+    // Listen for storage changes to update when data changes in another tab/instance
+    window.addEventListener("storage", loadData)
+    return () => window.removeEventListener("storage", loadData)
+  }, [])
 
   const container = {
     hidden: { opacity: 0 },
@@ -82,7 +103,7 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold">{libraryData.statistics.totalBooks.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{stats.totalBooks.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">Physical books available in our collection</p>
             </CardContent>
           </Card>
@@ -97,7 +118,7 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold">{libraryData.statistics.totalJournals.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{stats.totalJournals.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">Academic journals and periodicals</p>
             </CardContent>
           </Card>
@@ -112,7 +133,7 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold">{libraryData.statistics.totalEBooks.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{stats.totalEBooks.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">Digital books in our e-library</p>
             </CardContent>
           </Card>
@@ -135,7 +156,7 @@ export default function Home() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y">
-              {libraryData.announcements.map((announcement, index) => (
+              {announcements.map((announcement, index) => (
                 <div key={index} className="p-4 transition-colors hover:bg-muted/50">
                   <h3 className="font-semibold text-lg">{announcement.title}</h3>
                   <p className="mt-1 text-sm">{announcement.content}</p>
@@ -166,7 +187,7 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="mt-4 space-y-2">
-                {libraryData.hours.map((hour, index) => (
+                {hours.map((hour, index) => (
                   <div key={index} className="flex justify-between py-2 border-b border-dashed last:border-0">
                     <span className="font-medium">{hour.day}</span>
                     <span className="bg-amber-100 dark:bg-amber-900 px-2 py-1 rounded-md text-sm">{hour.time}</span>

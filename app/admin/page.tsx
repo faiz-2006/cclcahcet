@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useState, useEffect } from "react"
 import {
   BookOpen,
   Users,
@@ -21,6 +22,7 @@ import {
   Library
 } from "lucide-react"
 import { libraryData } from "@/data/library-data"
+import { getStatistics, getAnnouncements } from "@/lib/data-service"
 
 const quickActions = [
   {
@@ -110,6 +112,21 @@ const quickActions = [
 ]
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState(libraryData.statistics)
+  const [announcements, setAnnouncements] = useState(libraryData.announcements)
+
+  useEffect(() => {
+    // Load data from localStorage on mount
+    setStats(getStatistics())
+    setAnnouncements(getAnnouncements())
+
+    // Listen for storage changes
+    window.addEventListener("storage", () => {
+      setStats(getStatistics())
+      setAnnouncements(getAnnouncements())
+    })
+  }, [])
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
@@ -127,7 +144,7 @@ export default function AdminDashboard() {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{libraryData.statistics.totalBooks.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{stats.totalBooks.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Physical collection</p>
           </CardContent>
         </Card>
@@ -138,7 +155,7 @@ export default function AdminDashboard() {
             <Newspaper className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{libraryData.statistics.totalJournals}</div>
+            <div className="text-2xl font-bold">{stats.totalJournals}</div>
             <p className="text-xs text-muted-foreground">Print & electronic</p>
           </CardContent>
         </Card>
@@ -149,7 +166,7 @@ export default function AdminDashboard() {
             <BookMarked className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{libraryData.statistics.totalEBooks.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{stats.totalEBooks.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Digital collection</p>
           </CardContent>
         </Card>
@@ -208,7 +225,7 @@ export default function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {libraryData.announcements.slice(0, 3).map((announcement, index) => (
+            {announcements.slice(0, 3).map((announcement, index) => (
               <div key={index} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
                 <Bell className="h-5 w-5 text-primary mt-0.5" />
                 <div className="flex-1">

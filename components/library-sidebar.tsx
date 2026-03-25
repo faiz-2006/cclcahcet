@@ -17,15 +17,27 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { motion, AnimatePresence } from "framer-motion"
 import { libraryData } from "@/data/library-data"
+import { getSiteInfo } from "@/lib/data-service"
 
 export function LibrarySidebar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [siteInfo, setSiteInfo] = useState(libraryData.siteInfo)
 
   // Close mobile menu when route changes
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [pathname])
+
+  // Load site info from localStorage
+  useEffect(() => {
+    setSiteInfo(getSiteInfo())
+
+    // Listen for storage changes
+    window.addEventListener("storage", () => {
+      setSiteInfo(getSiteInfo())
+    })
+  }, [])
 
   const isActive = (path: string) => {
     return pathname === path
@@ -49,11 +61,11 @@ export function LibrarySidebar() {
           </Button>
           <Link href="/" className="flex items-center gap-2">
             <img 
-              src={libraryData.siteInfo.logo}
+              src={siteInfo.logo}
               alt="Logo" 
               className="h-8 w-auto rounded-md object-contain" 
             />
-            <span className="font-semibold text-sm">{libraryData.siteInfo.name}</span>
+            <span className="font-semibold text-sm">{siteInfo.name}</span>
           </Link>
         </div>
       </div>
@@ -83,11 +95,11 @@ export function LibrarySidebar() {
               <div className="flex items-center justify-between h-16 px-4 border-b">
                 <Link href="/" className="flex items-center gap-2">
                   <img 
-                    src={libraryData.siteInfo.logo}
+                    src={siteInfo.logo}
                     alt="Logo" 
                     className="h-8 w-auto rounded-md object-contain" 
                   />
-                  <span className="font-semibold text-sm">{libraryData.siteInfo.name}</span>
+                  <span className="font-semibold text-sm">{siteInfo.name}</span>
                 </Link>
                 <Button
                   variant="ghost"
@@ -132,11 +144,11 @@ export function LibrarySidebar() {
         <SidebarHeader className="flex items-center h-16 px-6 border-b">
           <Link href="/" className="flex items-center gap-2 w-full">
             <img 
-              src={libraryData.siteInfo.logo}
+              src={siteInfo.logo}
               alt="Logo" 
               className="h-10 w-auto rounded-md object-contain" 
             />
-            <span className="font-semibold truncate">{libraryData.siteInfo.name}</span>
+            <span className="font-semibold truncate">{siteInfo.name}</span>
           </Link>
         </SidebarHeader>
         <SidebarContent className="px-2 py-4">
