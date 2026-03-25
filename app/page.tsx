@@ -1,6 +1,6 @@
 "use client"
 
-import { BookOpen, BookText, Library, ArrowRight, Calendar, Bell, Users } from "lucide-react"
+import { BookOpen, BookText, Library, ArrowRight, Calendar, Bell, Users, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { libraryData } from "@/data/library-data"
 import { getLibraryData, getAnnouncements, getLibraryHours, getStatistics } from "@/lib/data-service"
@@ -92,7 +92,7 @@ export default function Home() {
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-5"
       >
         <motion.div variants={item} className="w-full">
           <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border-none shadow-md h-full">
@@ -135,6 +135,36 @@ export default function Home() {
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">{stats.totalEBooks.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">Digital books in our e-library</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item} className="w-full">
+          <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border-none shadow-md h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900">
+              <CardTitle className="text-sm font-medium">Daily Visitors</CardTitle>
+              <div className="h-8 w-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-orange-500" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="text-2xl font-bold">{stats.dailyVisitors.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Average visitors per day</p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item} className="w-full">
+          <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg border-none shadow-md h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-gradient-to-r from-pink-50 to-pink-100 dark:from-pink-950 dark:to-pink-900">
+              <CardTitle className="text-sm font-medium">Active Members</CardTitle>
+              <div className="h-8 w-8 rounded-full bg-pink-500/10 flex items-center justify-center">
+                <Users className="h-4 w-4 text-pink-500" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="text-2xl font-bold">{stats.activeMembers.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Registered members and users</p>
             </CardContent>
           </Card>
         </motion.div>
