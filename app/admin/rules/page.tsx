@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Save, RotateCcw, Plus, Trash2, ScrollText, Edit2, X, Check } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,15 +62,16 @@ export default function RulesPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("rulesData", JSON.stringify(rulesData))
+    await saveToServer("rulesData", rulesData)
     toast({
       title: "Rules Saved",
       description: "Library rules have been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const defaults = {
       general: libraryData.rules.general,
       borrowing: libraryData.rules.borrowing,
@@ -78,6 +80,7 @@ export default function RulesPage() {
     }
     setRulesData(defaults)
     localStorage.setItem("rulesData", JSON.stringify(defaults))
+    await saveToServer("rulesData", defaults)
     toast({
       title: "Rules Reset",
       description: "Library rules have been reset to defaults.",

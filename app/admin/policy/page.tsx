@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Save, RotateCcw, Plus, Trash2, FileText, Eye, Target, Scale, AlertTriangle } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,15 +67,16 @@ export default function PolicyPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("policyData", JSON.stringify(policyData))
+    await saveToServer("policyData", policyData)
     toast({
       title: "Policy Saved",
       description: "Library policy has been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const defaults = {
       vision: libraryData.policy.vision,
       mission: libraryData.policy.mission,
@@ -84,6 +86,7 @@ export default function PolicyPage() {
     }
     setPolicyData(defaults)
     localStorage.setItem("policyData", JSON.stringify(defaults))
+    await saveToServer("policyData", defaults)
     toast({
       title: "Policy Reset",
       description: "Library policy has been reset to defaults.",

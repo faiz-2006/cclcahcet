@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Save, RotateCcw, BookOpen, Newspaper, BookMarked, Users, TrendingUp } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 
 export default function StatisticsPage() {
   const { toast } = useToast()
@@ -34,15 +35,16 @@ export default function StatisticsPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("statistics", JSON.stringify(formData))
+    await saveToServer("statistics", formData)
     toast({
       title: "Statistics Saved",
       description: "Library statistics have been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const defaults = {
       totalBooks: libraryData.statistics.totalBooks,
       totalJournals: libraryData.statistics.totalJournals,
@@ -52,6 +54,7 @@ export default function StatisticsPage() {
     }
     setFormData(defaults)
     localStorage.setItem("statistics", JSON.stringify(defaults))
+    await saveToServer("statistics", defaults)
     toast({
       title: "Statistics Reset",
       description: "Statistics have been reset to defaults.",

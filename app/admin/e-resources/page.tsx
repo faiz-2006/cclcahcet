@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Save, RotateCcw, Plus, Trash2, BookMarked, ExternalLink, Globe, Edit2, X, Check } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,15 +70,16 @@ export default function EResourcesPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("eResourcesData", JSON.stringify(eResourcesData))
+    await saveToServer("eResourcesData", eResourcesData)
     toast({
       title: "E-Resources Saved",
       description: "E-Resources have been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const resources: EResource[] = []
     if (libraryData.eResources.delnet) {
       resources.push({
@@ -91,6 +93,7 @@ export default function EResourcesPage() {
     }
     setEResourcesData(defaults)
     localStorage.setItem("eResourcesData", JSON.stringify(defaults))
+    await saveToServer("eResourcesData", defaults)
     toast({
       title: "E-Resources Reset",
       description: "E-Resources have been reset to defaults.",

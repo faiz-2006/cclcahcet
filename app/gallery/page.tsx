@@ -1,8 +1,22 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { libraryData } from "@/data/library-data"
+import { getGalleryData } from "@/lib/data-service"
 import Image from "next/image"
 
 export default function GalleryPage() {
+  const [images, setImages] = useState(libraryData.gallery.all)
+
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await getGalleryData()
+      setImages(data)
+    }
+    loadData()
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-4">
@@ -11,7 +25,7 @@ export default function GalleryPage() {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {libraryData.gallery.all.map((image, index) => (
+        {images.map((image, index) => (
           <Card key={index} className="overflow-hidden">
             <CardContent className="p-0">
               <div className="relative aspect-square">

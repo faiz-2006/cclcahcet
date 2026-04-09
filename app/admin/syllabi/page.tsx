@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Save, RotateCcw, Plus, Trash2, GraduationCap, Edit2, X, Check, ExternalLink } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { undergraduateSyllabi, postgraduateSyllabi, Department, AcademicYear } from "@/data/syllabi-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -71,21 +72,23 @@ export default function SyllabiPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("syllabiData", JSON.stringify(syllabiData))
+    await saveToServer("syllabiData", syllabiData)
     toast({
       title: "Syllabi Saved",
       description: "All syllabi data has been saved successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const defaults = {
       undergraduate: undergraduateSyllabi,
       postgraduate: postgraduateSyllabi
     }
     setSyllabiData(defaults)
     localStorage.setItem("syllabiData", JSON.stringify(defaults))
+    await saveToServer("syllabiData", defaults)
     toast({
       title: "Syllabi Reset",
       description: "Syllabi have been reset to defaults.",

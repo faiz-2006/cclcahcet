@@ -1,7 +1,21 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { libraryData } from "@/data/library-data"
+import { getRulesData } from "@/lib/data-service"
 
 export default function RulesPage() {
+  const [rules, setRules] = useState(libraryData.rules)
+
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await getRulesData()
+      setRules(data)
+    }
+    loadData()
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-4">
@@ -10,21 +24,17 @@ export default function RulesPage() {
       </div>
 
       <Card>
-  <CardHeader>
-    <CardTitle>General Rules</CardTitle>
-    <CardDescription>Rules applicable to all library users</CardDescription>
-  </CardHeader>
-  <CardContent>
-    <ul className="list-disc pl-5 space-y-2">
-      {libraryData.rules.general.map((rule, index) => (
-        <li key={`rule-${index}`}>{rule}</li> 
-      ))}
-    </ul>
-  </CardContent>
-</Card>
-
-
-      <Card>
+        <CardHeader>
+          <CardTitle>General Rules</CardTitle>
+          <CardDescription>Rules applicable to all library users</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="list-disc pl-5 space-y-2">
+            {rules.general.map((rule, index) => (
+              <li key={`rule-${index}`}>{rule}</li> 
+            ))}
+          </ul>
+        </CardContent>
       </Card>
 
       <Card>
@@ -34,7 +44,7 @@ export default function RulesPage() {
         </CardHeader>
         <CardContent>
           <ul className="list-disc pl-5 space-y-2">
-            {libraryData.rules.borrowing.map((rule, index) => (
+            {rules.borrowing.map((rule, index) => (
               <li key={index}>{rule}</li>
             ))}
           </ul>
@@ -44,11 +54,10 @@ export default function RulesPage() {
       <Card>
         <CardHeader>
           <CardTitle>SC/ST Book Bank Facility</CardTitle>
-         
         </CardHeader>
         <CardContent>
           <ul className="list-disc pl-5 space-y-2">
-            {libraryData.rules.bookbank.map((rule, index) => (
+            {rules.bookbank.map((rule, index) => (
               <li key={index}>{rule}</li>
             ))}
           </ul>
@@ -57,11 +66,10 @@ export default function RulesPage() {
       <Card>
         <CardHeader>
           <CardTitle>Best Practice of the Library</CardTitle>
-         
         </CardHeader>
         <CardContent>
           <ul className="list-disc pl-5 space-y-2">
-            {libraryData.rules.practice.map((rule, index) => (
+            {rules.practice.map((rule, index) => (
               <li key={index}>{rule}</li>
             ))}
           </ul>
@@ -70,4 +78,3 @@ export default function RulesPage() {
     </div>
   )
 }
-

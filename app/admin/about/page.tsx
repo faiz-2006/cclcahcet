@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Save, RotateCcw, Plus, Trash2, Users, Building, Briefcase, Edit2, X, Check } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -79,15 +80,16 @@ export default function AboutPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("aboutData", JSON.stringify(aboutData))
+    await saveToServer("aboutData", aboutData)
     toast({
       title: "About Data Saved",
       description: "About section has been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const defaults = {
       history: libraryData.about.history,
       activities: libraryData.about.activities,
@@ -96,6 +98,7 @@ export default function AboutPage() {
     }
     setAboutData(defaults)
     localStorage.setItem("aboutData", JSON.stringify(defaults))
+    await saveToServer("aboutData", defaults)
     toast({
       title: "About Data Reset",
       description: "About section has been reset to defaults.",

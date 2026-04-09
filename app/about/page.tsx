@@ -1,8 +1,22 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { libraryData } from "@/data/library-data"
+import { getAboutData } from "@/lib/data-service"
 import Image from "next/image"
 
 export default function AboutPage() {
+  const [aboutData, setAboutData] = useState(libraryData.about)
+
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await getAboutData()
+      setAboutData(data)
+    }
+    loadData()
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-4">
@@ -26,10 +40,9 @@ export default function AboutPage() {
               height={400}
               className="w-full rounded-lg object-cover h-64"
             />
-            <p>{libraryData.about.history}</p>
+            <p>{aboutData.history}</p>
           </CardContent>
         </Card>
-       
       </div>
 
       <Card>
@@ -39,17 +52,8 @@ export default function AboutPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {libraryData.about.staff.map((person, index) => (
+            {aboutData.staff.map((person, index) => (
               <div key={index} className="flex flex-col items-center text-center">
-                {/* <div className="relative h-40 w-40 overflow-hidden rounded-full">
-                  <Image
-                    src="/placeholder.svg?height=160&width=160"
-                    alt={person.name}
-                    width={160}
-                    height={160}
-                    className="object-cover"
-                  />
-                </div> */}
                 <h3 className="mt-4 text-lg font-medium">{person.name}</h3>
                 <p className="text-sm text-muted-foreground">{person.position}</p>
               </div>
@@ -65,7 +69,7 @@ export default function AboutPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
-            {libraryData.about.facilities.map((facility, index) => (
+            {aboutData.facilities.map((facility, index) => (
               <div key={index} className="rounded-lg border p-4">
                 <h3 className="font-medium">{facility.name}</h3>
                 <p className="mt-2 text-sm">{facility.description}</p>
@@ -77,4 +81,3 @@ export default function AboutPage() {
     </div>
   )
 }
-

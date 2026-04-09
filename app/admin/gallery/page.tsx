@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Save, RotateCcw, Plus, Trash2, Image as ImageIcon, Edit2, X, Check, Upload } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +47,7 @@ export default function GalleryPage() {
   })
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [filterCategory, setFilterCategory] = useState<string>("all")
+  const [isUploading, setIsUploading] = useState(false)
 
   const categories = ["Facilities", "Events", "Collections", "Staff", "Other"]
 
@@ -58,17 +60,19 @@ export default function GalleryPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("galleryData", JSON.stringify(images))
+    await saveToServer("galleryData", images)
     toast({
       title: "Gallery Saved",
       description: "Gallery images have been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setImages(libraryData.gallery.all)
     localStorage.setItem("galleryData", JSON.stringify(libraryData.gallery.all))
+    await saveToServer("galleryData", libraryData.gallery.all)
     toast({
       title: "Gallery Reset",
       description: "Gallery has been reset to defaults.",
@@ -105,6 +109,44 @@ export default function GalleryPage() {
   const handleCancel = () => {
     setEditingIndex(null)
     setImageForm({ title: "", description: "", imageUrl: "", category: "Facilities" })
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setImageForm({ ...imageForm, imageUrl: data.url })
+        toast({
+          title: "Upload Successful",
+          description: "Image has been uploaded and URL inserted.",
+        })
+      } else {
+        throw new Error(data.error || "Failed to upload")
+      }
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploading(false)
+      // Reset input so the same file can be selected again if needed
+      e.target.value = ""
+    }
   }
 
   const filteredImages = filterCategory === "all" 
@@ -161,13 +203,39 @@ export default function GalleryPage() {
 
           <div className="space-y-2">
             <Label>Image URL *</Label>
-            <Input
-              value={imageForm.imageUrl}
-              onChange={(e) => setImageForm({ ...imageForm, imageUrl: e.target.value })}
-              placeholder="/image.jpg or https://example.com/image.jpg"
-            />
+            <div className="flex gap-2">
+              <Input
+                value={imageForm.imageUrl}
+                onChange={(e) => setImageForm({ ...imageForm, imageUrl: e.target.value })}
+                placeholder="/image.jpg or https://example.com/image.jpg"
+                className="flex-1"
+                disabled={isUploading}
+              />
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                  disabled={isUploading}
+                />
+                <Button type="button" variant="secondary" disabled={isUploading}>
+                  {isUploading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Uploading...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      Upload File
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground">
-              Use relative paths for local images (e.g., /entrance_lib.jpg) or full URLs for external images
+              Provide a web URL or upload an image directly from your computer.
             </p>
           </div>
 

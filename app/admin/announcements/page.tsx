@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Save, RotateCcw, Plus, Trash2, Bell, Calendar } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,17 +47,19 @@ export default function AnnouncementsPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("announcements", JSON.stringify(announcements))
+    await saveToServer("announcements", announcements)
     toast({
       title: "Announcements Saved",
       description: "All announcements have been saved successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setAnnouncements(libraryData.announcements)
     localStorage.setItem("announcements", JSON.stringify(libraryData.announcements))
+    await saveToServer("announcements", libraryData.announcements)
     toast({
       title: "Announcements Reset",
       description: "Announcements have been reset to defaults.",

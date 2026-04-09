@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Save, RotateCcw, Plus, Trash2, Newspaper, Edit2, X, Check, Search, Download } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { journalData, Journal } from "@/data/journals-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -69,17 +70,19 @@ export default function JournalsPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("journalsData", JSON.stringify(journals))
+    await saveToServer("journalsData", journals)
     toast({
       title: "Journals Saved",
       description: "All journal data has been saved successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setJournals(journalData)
     localStorage.setItem("journalsData", JSON.stringify(journalData))
+    await saveToServer("journalsData", journalData)
     toast({
       title: "Journals Reset",
       description: "Journals have been reset to defaults.",

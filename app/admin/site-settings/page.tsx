@@ -5,12 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Save, RotateCcw } from "lucide-react"
+import { Save, RotateCcw, Upload } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 
 export default function SiteSettingsPage() {
   const { toast } = useToast()
+  const [isUploading, setIsUploading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     tagline: "",
@@ -33,15 +35,53 @@ export default function SiteSettingsPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("siteSettings", JSON.stringify(formData))
+    await saveToServer("siteSettings", formData)
     toast({
       title: "Settings Saved",
       description: "Site settings have been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    const uploadData = new FormData()
+    uploadData.append("file", file)
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadData,
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setFormData({ ...formData, logo: data.url })
+        toast({
+          title: "Upload Successful",
+          description: "Logo has been uploaded successfully.",
+        })
+      } else {
+        throw new Error(data.error || "Failed to upload")
+      }
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploading(false)
+      e.target.value = ""
+    }
+  }
+
+  const handleReset = async () => {
     const defaults = {
       name: libraryData.siteInfo.name,
       tagline: libraryData.siteInfo.tagline,
@@ -50,6 +90,7 @@ export default function SiteSettingsPage() {
     }
     setFormData(defaults)
     localStorage.setItem("siteSettings", JSON.stringify(defaults))
+    await saveToServer("siteSettings", defaults)
     toast({
       title: "Settings Reset",
       description: "Site settings have been reset to defaults.",
@@ -103,14 +144,40 @@ export default function SiteSettingsPage() {
 
           <div className="space-y-2">
             <Label htmlFor="logo">Logo Path</Label>
-            <Input
-              id="logo"
-              value={formData.logo}
-              onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-              placeholder="/logo.png"
-            />
+            <div className="flex gap-2">
+              <Input
+                id="logo"
+                value={formData.logo}
+                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                placeholder="/logo.png"
+                className="flex-1"
+                disabled={isUploading}
+              />
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                  disabled={isUploading}
+                />
+                <Button type="button" variant="secondary" disabled={isUploading}>
+                  {isUploading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Uploading...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      Upload File
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground">
-              Enter the path to your logo image (e.g., /logo.png). Upload the image to the public folder.
+              Provide a web URL or upload an image directly from your computer.
             </p>
           </div>
 

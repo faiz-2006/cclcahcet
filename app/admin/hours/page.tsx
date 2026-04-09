@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Save, RotateCcw, Plus, Trash2, Clock } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,17 +44,19 @@ export default function HoursPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("libraryHours", JSON.stringify(hours))
+    await saveToServer("libraryHours", hours)
     toast({
       title: "Hours Saved",
       description: "Library hours have been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setHours(libraryData.hours)
     localStorage.setItem("libraryHours", JSON.stringify(libraryData.hours))
+    await saveToServer("libraryHours", libraryData.hours)
     toast({
       title: "Hours Reset",
       description: "Library hours have been reset to defaults.",

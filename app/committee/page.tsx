@@ -1,8 +1,25 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { libraryData } from "@/data/library-data"
-import Image from "next/image"
+import { getCommitteeData } from "@/lib/data-service"
 
 export default function LibraryCommitteePage() {
+  const [committee, setCommittee] = useState({
+    members: libraryData.members,
+    functions: libraryData.functions,
+    aboutCommittee: libraryData.aboutCommittee,
+  })
+
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await getCommitteeData()
+      setCommittee(data)
+    }
+    loadData()
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-4">
@@ -27,7 +44,7 @@ export default function LibraryCommitteePage() {
                 </tr>
               </thead>
               <tbody>
-                {libraryData.members.map((member, index) => (
+                {committee.members.map((member, index) => (
                   <tr key={index} className="border-b">
                     <td className="py-3">{member.position}</td>
                     <td className="py-3">{member.role}</td>
@@ -44,7 +61,7 @@ export default function LibraryCommitteePage() {
           </CardHeader>
           <CardContent>
             <ul className="list-disc pl-7 space-y-2">
-              {libraryData.functions.map((function_, index) => (
+              {committee.functions.map((function_, index) => (
                 <li key={index}>{function_}</li>
               ))}
             </ul>
@@ -58,7 +75,7 @@ export default function LibraryCommitteePage() {
           <CardDescription>Purpose and responsibilities</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p>{libraryData.aboutCommittee.description}</p>
+          <p>{committee.aboutCommittee.description}</p>
         </CardContent>
       </Card>
     </div>

@@ -1,12 +1,41 @@
 "use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { MapPin, Phone, Mail } from "lucide-react"
+import { getContactData, getLibraryHours } from "@/lib/data-service"
+import { libraryData } from "@/data/library-data"
 
 export default function ContactPage() {
+  const [contact, setContact] = useState({
+    address: "C. Abdul Hakeem College of Engineering & Technology, Melvisharam - 632 509, Ranipet Dt., Tamil Nadu, India",
+    phone: "+91-4172-266850",
+    email: "library@cahcet.edu.in",
+    website: "https://cahcet.edu.in",
+    mapEmbed: "",
+    workingHours: "Monday - Saturday: 8:00 AM - 8:00 PM",
+    librarian: {
+      name: "A. Fahim Sheriff",
+      designation: "Librarian",
+      email: "librarian@cahcet.edu.in",
+      phone: "+91-4172-267387",
+    },
+  })
+  const [hours, setHours] = useState(libraryData.hours)
+
+  useEffect(() => {
+    const loadData = async () => {
+      const [c, h] = await Promise.all([getContactData(), getLibraryHours()])
+      setContact(c)
+      setHours(h)
+    }
+    loadData()
+  }, [])
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col space-y-4">
@@ -28,7 +57,7 @@ export default function ContactPage() {
               <div>
                 <p className="font-medium">College Library Address</p>
                 <p className="text-sm text-muted-foreground">
-                  Library Block, C. Abdul Hakeem College of Engineering and Technology Campus, Hakeem Nagar, Melvisharam, Ranipet 632509. 
+                  {contact.address}
                 </p>
               </div>
             </div>
@@ -37,7 +66,7 @@ export default function ContactPage() {
               <div>
                 <p className="font-medium">Phone Number</p>
                 <p className="text-sm text-muted-foreground">
-                +91-4172-267387
+                  {contact.phone}
                 </p>
               </div>
             </div>
@@ -46,7 +75,7 @@ export default function ContactPage() {
               <div>
                 <p className="font-medium">Email</p>
                 <p className="text-sm text-muted-foreground">
-                  librarian@cahcet.edu.in
+                  {contact.email}
                 </p>
               </div>
             </div>
@@ -108,14 +137,12 @@ export default function ContactPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-lg border p-4">
-              <h3 className="font-medium">Weekdays</h3>
-              <p className="mt-2 text-sm">8:00 AM - 8:00 PM</p>
-            </div>
-            <div className="rounded-lg border p-4">
-              <h3 className="font-medium">Weekends</h3>
-              <p className="mt-2 text-sm">10:00 AM - 4:00 PM</p>
-            </div>
+            {hours.map((hour, index) => (
+              <div key={index} className="rounded-lg border p-4">
+                <h3 className="font-medium">{hour.day}</h3>
+                <p className="mt-2 text-sm">{hour.time}</p>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

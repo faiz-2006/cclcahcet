@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Save, RotateCcw, Plus, Trash2, Users, Edit2, X, Check } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
+import { saveToServer } from "@/lib/data-service"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,15 +60,16 @@ export default function CommitteePage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("committeeData", JSON.stringify(committeeData))
+    await saveToServer("committeeData", committeeData)
     toast({
       title: "Committee Data Saved",
       description: "Committee information has been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const defaults = {
       members: libraryData.members,
       functions: libraryData.functions,
@@ -75,6 +77,7 @@ export default function CommitteePage() {
     }
     setCommitteeData(defaults)
     localStorage.setItem("committeeData", JSON.stringify(defaults))
+    await saveToServer("committeeData", defaults)
     toast({
       title: "Committee Data Reset",
       description: "Committee information has been reset to defaults.",

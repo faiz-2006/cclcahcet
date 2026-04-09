@@ -17,10 +17,10 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  // Default credentials (in production, use proper authentication)
+  // Admin credentials
   const ADMIN_CREDENTIALS = {
-    username: "librarian",
-    password: "cahcet@2024"
+    username: "admin",
+    password: "CCL@cahcet2025"
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -121,13 +121,9 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground text-center">
-              <strong>Default Credentials:</strong><br />
-              Username: <code className="bg-background px-1 rounded">librarian</code><br />
-              Password: <code className="bg-background px-1 rounded">cahcet@2024</code>
-            </p>
-          </div>
+          <p className="mt-6 text-xs text-muted-foreground text-center">
+            Contact the librarian if you need access.
+          </p>
         </CardContent>
       </Card>
     </div>

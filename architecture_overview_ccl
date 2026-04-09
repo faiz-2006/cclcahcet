@@ -1,0 +1,300 @@
+# CCL CAHCET Central Library — Architecture & Tech Stack
+
+## Project Overview
+
+**CAHCET Central Library** (`ccl_lib_cahcet`) is a college library website for the **C. Abdul Hakeem College of Engineering & Technology**. It provides public-facing pages (about, gallery, journals, e-resources, OPAC, etc.) and an **admin panel** for managing site content.
+
+---
+
+## Tech Stack Summary
+
+| Layer | Technology | Version |
+|---|---|---|
+| **Framework** | Next.js (App Router) | 15.2.8 |
+| **Language** | TypeScript | ^5 |
+| **UI Library** | React | ^18.3.1 |
+| **Styling** | Tailwind CSS + CSS Variables | ^3.4.17 |
+| **Component Library** | shadcn/ui (Radix UI primitives) | — |
+| **Animations** | Framer Motion | latest |
+| **Icons** | Lucide React | ^0.454.0 |
+| **Charts** | Recharts | 2.15.0 |
+| **Forms** | React Hook Form + Zod validation | ^7.54.1 / ^3.24.1 |
+| **Font** | Inter (Google Fonts, via `next/font`) | — |
+| **Containerization** | Docker (Node 18 base image) | — |
+
+---
+
+## Frontend
+
+### Framework & Rendering
+- **Next.js 15 App Router** — uses the `app/` directory convention for file-system based routing with React Server Components (RSC) enabled (`"rsc": true` in `components.json`).
+- **TypeScript** throughout — strict mode, bundler module resolution, path aliases (`@/*`).
+
+### Styling
+- **Tailwind CSS v3** with `tailwindcss-animate` plugin.
+- **CSS custom properties (HSL)** for theming — defined in `app/globals.css`, consumed via Tailwind config.
+- Custom color palettes: teal, emerald, violet, amber.
+- Custom keyframes/animations: marquee, fadeIn, slideUp, pulse, accordion.
+- Dark mode support scaffolded (`darkMode: ["class"]`) but currently **commented out** in the layout.
+
+### Component System (shadcn/ui)
+50 pre-built UI components in `components/ui/`, including:
+
+| Category | Components |
+|---|---|
+| **Layout** | Card, Sidebar, Separator, Resizable Panels, Scroll Area, Sheet, Aspect Ratio |
+| **Navigation** | Navigation Menu, Menubar, Breadcrumb, Tabs, Pagination |
+| **Forms** | Input, Textarea, Select, Checkbox, Radio Group, Switch, Slider, Calendar, Date Picker (via react-day-picker), Input OTP, Form (with react-hook-form integration) |
+| **Feedback** | Toast/Toaster (Radix + Sonner), Alert, Alert Dialog, Dialog, Drawer (vaul), Progress, Skeleton |
+| **Data Display** | Table, Badge, Avatar, Hover Card, Tooltip, Carousel (embla-carousel), Chart (recharts) |
+| **Overlays** | Popover, Dropdown Menu, Context Menu, Command (cmdk), Collapsible, Accordion |
+| **Misc** | Button, Toggle, Toggle Group, Label |
+
+### Custom Components
+| Component | File | Purpose |
+|---|---|---|
+| `LibrarySidebar` | `components/library-sidebar.tsx` | Main navigation sidebar with all menu items |
+| `TopMarquee` | `components/top-marquee.tsx` | Scrolling announcement/stats banner at the top |
+| `ThemeProvider` | `components/theme-provider.tsx` | Dark/light theme toggle (currently disabled) |
+
+### Custom Hooks
+| Hook | File | Purpose |
+|---|---|---|
+| `useMobile` | `hooks/use-mobile.tsx` | Detects mobile viewport for responsive logic |
+| `useToast` | `hooks/use-toast.ts` | Toast notification state management |
+
+---
+
+## Backend
+
+> [!IMPORTANT]
+> This project has **no traditional backend server or API layer**. All data is served statically or managed client-side.
+
+### Data Architecture
+- **Static data files** in `data/` directory serve as the primary data source:
+  - [library-data.tsx](file:///c:/Users/Admin/Desktop/ccl/ccl_cahcet/data/library-data.tsx) — Master data file containing site info, navigation, statistics, announcements, hours, committee, about, rules, e-resources, gallery, and policy data
+  - [journals-data.tsx](file:///c:/Users/Admin/Desktop/ccl/ccl_cahcet/data/journals-data.tsx) — Journals catalog data
+  - [syllabi-data.tsx](file:///c:/Users/Admin/Desktop/ccl/ccl_cahcet/data/syllabi-data.tsx) — Syllabi/curriculum data
+
+- **Data Service Layer** (`lib/data-service.ts`) — Provides getter functions that:
+  1. Check `localStorage` for admin-modified values
+  2. Fall back to static defaults from `library-data.tsx`
+  3. Merge overrides with defaults using spread operators
+
+### Admin Content Management
+The admin panel (`app/admin/`) allows editing content which gets persisted to **browser `localStorage`** — there is no server-side database. Admin sections include:
+
+| Admin Page | Route | Manages |
+|---|---|---|
+| Dashboard | `/admin` | Overview statistics |
+| About | `/admin/about` | Library about page content |
+| Announcements | `/admin/announcements` | News & announcements |
+| Committee | `/admin/committee` | Committee member info |
+| Contact | `/admin/contact` | Contact page details |
+| E-Resources | `/admin/e-resources` | Electronic resource links |
+| Gallery | `/admin/gallery` | Photo gallery management |
+| Hours | `/admin/hours` | Library operating hours |
+| Journals | `/admin/journals` | Journal catalog |
+| Login | `/admin/login` | Admin authentication |
+| Policy | `/admin/policy` | Library policies |
+| Rules | `/admin/rules` | Rules & regulations |
+| Site Settings | `/admin/site-settings` | Global site configuration |
+| Statistics | `/admin/statistics` | Library stats |
+| Syllabi | `/admin/syllabi` | Course syllabi |
+
+---
+
+## Database / Storage
+
+> [!NOTE]
+> There is **no external database** (no SQL, no Supabase, no Firebase currently integrated in the codebase).
+
+| Storage Layer | Technology | Purpose |
+|---|---|---|
+| **Static Data** | TypeScript files (`data/*.tsx`) | Default/seed content |
+| **Client-Side Persistence** | Browser `localStorage` | Admin-edited content overrides |
+| **Static Assets** | `public/` directory | Images (JPG/PNG), favicons, placeholders |
+
+### Static Assets in `public/`
+- Library photos: entrance, bookshelf, digital library, OPAC, issue counter
+- Logos: `logo-ccl.png`
+- Placeholders: SVG and JPG placeholder images
+- Favicons
+
+---
+
+## Page Routing Map (App Router)
+
+```mermaid
+graph TD
+    ROOT["/ (Home)"] --> ABOUT["/about"]
+    ROOT --> RULES["/rules"]
+    ROOT --> POLICY["/policy"]
+    ROOT --> COMMITTEE["/committee"]
+    ROOT --> SYLLABI["/syllabi"]
+    ROOT --> ERESOURCES["/e-resources"]
+    ROOT --> GALLERY["/gallery"]
+    ROOT --> OPAC["/opac"]
+    ROOT --> EBOOKS["/e-books"]
+    ROOT --> JOURNALS["/journals"]
+    ROOT --> CONTACT["/contact"]
+    
+    ADMIN["/admin"] --> ADMIN_LOGIN["/admin/login"]
+    ADMIN --> ADMIN_ABOUT["/admin/about"]
+    ADMIN --> ADMIN_ANNOUNCE["/admin/announcements"]
+    ADMIN --> ADMIN_COMMITTEE["/admin/committee"]
+    ADMIN --> ADMIN_CONTACT["/admin/contact"]
+    ADMIN --> ADMIN_ERES["/admin/e-resources"]
+    ADMIN --> ADMIN_GALLERY["/admin/gallery"]
+    ADMIN --> ADMIN_HOURS["/admin/hours"]
+    ADMIN --> ADMIN_JOURNALS["/admin/journals"]
+    ADMIN --> ADMIN_POLICY["/admin/policy"]
+    ADMIN --> ADMIN_RULES["/admin/rules"]
+    ADMIN --> ADMIN_SETTINGS["/admin/site-settings"]
+    ADMIN --> ADMIN_STATS["/admin/statistics"]
+    ADMIN --> ADMIN_SYLLABI["/admin/syllabi"]
+
+    style ROOT fill:#0d9488,color:#fff
+    style ADMIN fill:#7c3aed,color:#fff
+```
+
+---
+
+## Directory Structure
+
+```
+ccl_cahcet/
+├── app/                          # Next.js App Router pages
+│   ├── layout.tsx                # Root layout (sidebar + marquee + toaster)
+│   ├── page.tsx                  # Home page
+│   ├── globals.css               # Global styles & CSS variables
+│   ├── about/page.tsx            # About page
+│   ├── committee/page.tsx        # Committee page
+│   ├── contact/page.tsx          # Contact page
+│   ├── e-books/page.tsx          # E-Books page
+│   ├── e-resources/page.tsx      # E-Resources page
+│   ├── gallery/page.tsx          # Gallery page
+│   ├── journals/                 
+│   │   ├── page.tsx              # Journals listing
+│   │   └── loading.tsx           # Loading state
+│   ├── opac/page.tsx             # OPAC search page
+│   ├── policy/page.tsx           # Library policy
+│   ├── rules/page.tsx            # Rules & regulations
+│   ├── syllabi/page.tsx          # Syllabi page
+│   └── admin/                    # Admin panel (separate layout)
+│       ├── layout.tsx            # Admin layout (own sidebar/nav)
+│       ├── page.tsx              # Admin dashboard
+│       ├── login/page.tsx        # Admin login
+│       ├── about/                # Admin: edit about
+│       ├── announcements/        # Admin: manage announcements
+│       ├── committee/            # Admin: manage committee
+│       ├── contact/              # Admin: edit contact info
+│       ├── e-resources/          # Admin: manage e-resources
+│       ├── gallery/              # Admin: manage gallery
+│       ├── hours/                # Admin: set library hours
+│       ├── journals/             # Admin: manage journals
+│       ├── policy/               # Admin: edit policies
+│       ├── rules/                # Admin: edit rules
+│       ├── site-settings/        # Admin: global settings
+│       ├── statistics/           # Admin: update statistics
+│       └── syllabi/              # Admin: manage syllabi
+│
+├── components/                   # Shared components
+│   ├── library-sidebar.tsx       # Main navigation sidebar
+│   ├── top-marquee.tsx           # Scrolling top banner
+│   ├── theme-provider.tsx        # Theme toggle provider
+│   └── ui/                       # 50 shadcn/ui components
+│
+├── data/                         # Static data (source of truth)
+│   ├── library-data.tsx          # Master library data
+│   ├── journals-data.tsx         # Journals catalog
+│   └── syllabi-data.tsx          # Syllabi data
+│
+├── hooks/                        # Custom React hooks
+│   ├── use-mobile.tsx            # Mobile detection
+│   └── use-toast.ts              # Toast notifications
+│
+├── lib/                          # Utilities & services
+│   ├── data-service.ts           # Data access layer (localStorage + defaults)
+│   └── utils.ts                  # General utilities (cn helper)
+│
+├── public/                       # Static assets
+│   ├── favicon/                  # Favicon files
+│   ├── logo-ccl.png              # Library logo
+│   ├── *.jpg                     # Library photos
+│   └── placeholder.*             # Placeholder images
+│
+├── styles/
+│   └── globals.css               # Additional global styles
+│
+├── DockerFile                    # Docker build config (Node 18)
+├── next.config.mjs               # Next.js configuration
+├── tailwind.config.ts            # Tailwind CSS configuration
+├── tsconfig.json                 # TypeScript configuration
+├── components.json               # shadcn/ui configuration
+├── postcss.config.mjs            # PostCSS configuration
+├── package.json                  # Dependencies & scripts
+└── package-lock.json             # Dependency lock file
+```
+
+---
+
+## Data Flow Diagram
+
+```mermaid
+flowchart LR
+    subgraph "Data Sources"
+        A["data/*.tsx<br/>(Static defaults)"]
+        B["localStorage<br/>(Admin overrides)"]
+    end
+
+    subgraph "Service Layer"
+        C["lib/data-service.ts<br/>getLibraryData()"]
+    end
+
+    subgraph "UI Layer"
+        D["Public Pages<br/>(app/*)"]
+        E["Admin Pages<br/>(app/admin/*)"]
+    end
+
+    A --> C
+    B --> C
+    C --> D
+    E -->|"writes to"| B
+    A -->|"fallback"| C
+
+    style A fill:#0d9488,color:#fff
+    style B fill:#f59e0b,color:#fff
+    style C fill:#8b5cf6,color:#fff
+    style D fill:#10b981,color:#fff
+    style E fill:#7c3aed,color:#fff
+```
+
+---
+
+## Deployment
+
+| Aspect | Details |
+|---|---|
+| **Container** | Docker with Node 18 base image |
+| **Build** | `npm run build` → Next.js production build |
+| **Start** | `npm start` (port 3000) |
+| **Dev Server** | `npm run dev` |
+| **Image Optimization** | Disabled (`unoptimized: true`) for static export compatibility |
+| **Build Optimizations** | Webpack build workers, parallel server traces & compiles enabled |
+
+---
+
+## Key Architectural Notes
+
+> [!WARNING]
+> **No real database** — All admin changes are stored in `localStorage`, meaning:
+> - Data is per-browser and per-device only
+> - Clearing browser data wipes all admin edits
+> - Changes don't sync across users or devices
+
+> [!NOTE]
+> **No API routes** — The project has no `app/api/` directory. Everything is client-side rendered or statically generated.
+
+> [!TIP]
+> To add persistent data storage, you would need to integrate a backend database (e.g., Supabase, Firebase, or a custom API) and replace the `localStorage`-based data service.

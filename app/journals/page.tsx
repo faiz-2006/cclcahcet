@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { journalData, departments, Journal } from '@/data/journals-data';
+import { getJournalsData } from '@/lib/data-service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -13,25 +14,27 @@ const JournalsPage = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
+  const [allJournals, setAllJournals] = useState<Journal[]>(journalData);
   const [filteredJournals, setFilteredJournals] = useState<Journal[]>(journalData);
 
-  // Filter journals when any filter criteria changes
   useEffect(() => {
-    let result = journalData;
-    
-    // Filter by journal type (national/international)
+    const loadData = async () => {
+      const data = await getJournalsData();
+      setAllJournals(data);
+    };
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    let result = allJournals;
     if (activeTab !== "all") {
       result = result.filter(journal => 
         journal.type === (activeTab === "national" ? "National" : "International")
       );
     }
-    
-    // Filter by department
     if (selectedDepartment !== "all") {
       result = result.filter(journal => journal.department === selectedDepartment);
     }
-    
-    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(journal => 
@@ -39,11 +42,9 @@ const JournalsPage = () => {
         journal.department.toLowerCase().includes(query)
       );
     }
-    
     setFilteredJournals(result);
-  }, [activeTab, searchQuery, selectedDepartment]);
+  }, [activeTab, searchQuery, selectedDepartment, allJournals]);
 
-  // Group journals by department
   const journalsByDepartment = departments.reduce((acc, department) => {
     const departmentJournals = filteredJournals.filter(journal => journal.department === department);
     if (departmentJournals.length > 0) {
@@ -64,7 +65,6 @@ const JournalsPage = () => {
         </p>
       </div>
 
-      {/* Filters Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -86,10 +86,7 @@ const JournalsPage = () => {
                 />
               </div>
               <div className="w-full md:w-64">
-                <Select
-                  value={selectedDepartment}
-                  onValueChange={setSelectedDepartment}
-                >
+                <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Department" />
                   </SelectTrigger>
@@ -106,7 +103,6 @@ const JournalsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Tabs for National/International */}
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="all">All Journals</TabsTrigger>
@@ -125,7 +121,6 @@ const JournalsPage = () => {
             </Badge>
           </div>
 
-          {/* Journals Display */}
           {Object.keys(journalsByDepartment).length > 0 ? (
             <div className="space-y-6 mt-4">
               {Object.entries(journalsByDepartment).map(([department, journals]) => (
@@ -138,10 +133,7 @@ const JournalsPage = () => {
                     <ScrollArea className="h-64 rounded-md">
                       <div className="grid gap-2">
                         {journals.map((journal, index) => (
-                          <div 
-                            key={index} 
-                            className="p-3 rounded-lg border bg-card hover:bg-accent/20 transition-colors"
-                          >
+                          <div key={index} className="p-3 rounded-lg border bg-card hover:bg-accent/20 transition-colors">
                             <div className="flex justify-between items-start">
                               <div className="text-sm">{journal.name}</div>
                               <Badge variant={journal.type === "National" ? "default" : "secondary"} className="ml-2">

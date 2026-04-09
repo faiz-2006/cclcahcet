@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { saveToServer } from "@/lib/data-service"
 
 interface ContactData {
   address: string
@@ -61,17 +62,19 @@ export default function ContactPage() {
     }
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("contactData", JSON.stringify(contactData))
+    await saveToServer("contactData", contactData)
     toast({
       title: "Contact Info Saved",
       description: "Contact information has been updated successfully.",
     })
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setContactData(defaultContactData)
     localStorage.setItem("contactData", JSON.stringify(defaultContactData))
+    await saveToServer("contactData", defaultContactData)
     toast({
       title: "Contact Info Reset",
       description: "Contact information has been reset to defaults.",

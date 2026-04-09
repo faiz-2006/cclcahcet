@@ -29,14 +29,13 @@ export function LibrarySidebar() {
     setMobileMenuOpen(false)
   }, [pathname])
 
-  // Load site info from localStorage
+  // Load site info from server
   useEffect(() => {
-    setSiteInfo(getSiteInfo())
-
-    // Listen for storage changes
-    window.addEventListener("storage", () => {
-      setSiteInfo(getSiteInfo())
-    })
+    const loadSiteInfo = async () => {
+      const info = await getSiteInfo()
+      setSiteInfo(info)
+    }
+    loadSiteInfo()
   }, [])
 
   const isActive = (path: string) => {

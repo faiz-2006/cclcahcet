@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { undergraduateSyllabi, postgraduateSyllabi, Department } from "@/data/syllabi-data"
+import { getSyllabiData } from "@/lib/data-service"
 import { Button } from "@/components/ui/button"
 import { FileDown, Search, Filter, BookOpen, GraduationCap } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,6 +17,18 @@ export default function SyllabiPage() {
   const [selectedDepartment, setSelectedDepartment] = useState("")
   const [selectedYear, setSelectedYear] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
+  const [syllabiDataState, setSyllabiDataState] = useState({
+    undergraduate: undergraduateSyllabi,
+    postgraduate: postgraduateSyllabi,
+  })
+
+  useEffect(() => {
+    const loadData = async () => {
+      const data = await getSyllabiData()
+      setSyllabiDataState(data)
+    }
+    loadData()
+  }, [])
 
   const handleDownload = (pdfLink: string, departmentName: string) => {
     toast({
@@ -25,7 +38,7 @@ export default function SyllabiPage() {
     window.open(pdfLink, "_blank")
   }
 
-  const syllabi = selectedLevel === "undergraduate" ? undergraduateSyllabi : postgraduateSyllabi
+  const syllabi = selectedLevel === "undergraduate" ? syllabiDataState.undergraduate : syllabiDataState.postgraduate
 
   const filteredDepartments = syllabi.filter(
     (dept) => !searchQuery || dept.department.toLowerCase().includes(searchQuery.toLowerCase())
@@ -37,7 +50,6 @@ export default function SyllabiPage() {
     setSearchQuery("")
   }
 
-  // Color themes based on level
   const getColorTheme = () => {
     return selectedLevel === "undergraduate"
       ? {
@@ -212,7 +224,7 @@ export default function SyllabiPage() {
             <li>Select your program level (Undergraduate or Postgraduate)</li>
             <li>Choose your department from the available options</li>
             <li>Select the academic year of study</li>
-            <li>Click the "Download" button for the department syllabus</li>
+            <li>Click the &quot;Download&quot; button for the department syllabus</li>
             <li>The PDF will open in a new tab or download automatically</li>
             <li>For any issues accessing syllabi, contact the library staff</li>
           </ol>

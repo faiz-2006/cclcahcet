@@ -1,0 +1,55 @@
+{
+  "statistics": {
+    "totalBooks": 39410,
+    "totalJournals": 134,
+    "totalEBooks": 40033,
+    "dailyVisitors": 3546,
+    "activeMembers": 1203
+  },
+  "libraryHours": [
+    {
+      "day": "Monday - Friday",
+      "time": "8:00 AM - 8:00 PM"
+    },
+    {
+      "day": "Saturday",
+      "time": "9:00 AM - 5:00 PM"
+    },
+    {
+      "day": "Holidays",
+      "time": "10:00 AM - 2:00 PM"
+    }
+  ],
+  "galleryData": [
+    {
+      "title": "Library Entrance",
+      "description": "Main entrance to the library",
+      "imageUrl": "/entrance_lib.jpg",
+      "category": "Facilities"
+    },
+    {
+      "title": "Issue & Return Counters",
+      "description": "Counters for issuing and returning books",
+      "imageUrl": "/issue.jpg",
+      "category": "Facilities"
+    },
+    {
+      "title": "Digital Library",
+      "description": "Access to online e-books and e-resources, with advanced search capabilities",
+      "imageUrl": "/Digital Library.jpg",
+      "category": "Facilities"
+    },
+    {
+      "title": "OPAC Access",
+      "description": "Online Public Access Catalog for searching library resources",
+      "imageUrl": "/opac_lib.jpg",
+      "category": "Facilities"
+    },
+    {
+      "title": "Book Shelf Index",
+      "description": "Collection of 30,000+ books on various subjects, departments, and languages",
+      "imageUrl": "/bookshelf_index.jpg",
+      "category": "Facilities"
+    }
+  ]
+}

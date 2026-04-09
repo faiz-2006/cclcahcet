@@ -116,15 +116,15 @@ export default function AdminDashboard() {
   const [announcements, setAnnouncements] = useState(libraryData.announcements)
 
   useEffect(() => {
-    // Load data from localStorage on mount
-    setStats(getStatistics())
-    setAnnouncements(getAnnouncements())
-
-    // Listen for storage changes
-    window.addEventListener("storage", () => {
-      setStats(getStatistics())
-      setAnnouncements(getAnnouncements())
-    })
+    const loadData = async () => {
+      const [s, a] = await Promise.all([
+        getStatistics(),
+        getAnnouncements()
+      ])
+      setStats(s)
+      setAnnouncements(a)
+    }
+    loadData()
   }, [])
 
   return (

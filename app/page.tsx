@@ -3,7 +3,7 @@
 import { BookOpen, BookText, Library, ArrowRight, Calendar, Bell, Users, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { libraryData } from "@/data/library-data"
-import { getLibraryData, getAnnouncements, getLibraryHours, getStatistics } from "@/lib/data-service"
+import { getAnnouncements, getLibraryHours, getStatistics } from "@/lib/data-service"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -26,19 +26,18 @@ export default function Home() {
   }, [toast])
 
   useEffect(() => {
-    // Load data from localStorage on mount
-    const loadData = () => {
-      setStats(getStatistics())
-      setAnnouncements(getAnnouncements())
-      setHours(getLibraryHours())
+    const loadData = async () => {
+      const [s, a, h] = await Promise.all([
+        getStatistics(),
+        getAnnouncements(),
+        getLibraryHours(),
+      ])
+      setStats(s)
+      setAnnouncements(a)
+      setHours(h)
       setIsLoaded(true)
     }
-
     loadData()
-
-    // Listen for storage changes to update when data changes in another tab/instance
-    window.addEventListener("storage", loadData)
-    return () => window.removeEventListener("storage", loadData)
   }, [])
 
   const container = {
@@ -252,7 +251,7 @@ export default function Home() {
                 <div>
                   <h3 className="font-medium">Daily Visitors</h3>
                   <p className="text-sm text-muted-foreground">
-                    Average {libraryData.statistics.dailyVisitors} students per day
+                    Average {stats.dailyVisitors} students per day
                   </p>
                 </div>
               </div>
@@ -271,4 +270,3 @@ export default function Home() {
     </div>
   )
 }
-
