@@ -74,7 +74,7 @@ export default function EResourcesPage() {
     localStorage.setItem("eResourcesData", JSON.stringify(eResourcesData))
     await saveToServer("eResourcesData", eResourcesData)
     toast({
-      title: "E-Resources Saved",
+      title: "E-Resources Updated",
       description: "E-Resources have been updated successfully.",
     })
   }

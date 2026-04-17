@@ -66,7 +66,7 @@ export default function ContactPage() {
     localStorage.setItem("contactData", JSON.stringify(contactData))
     await saveToServer("contactData", contactData)
     toast({
-      title: "Contact Info Saved",
+      title: "Contact Info Updated",
       description: "Contact information has been updated successfully.",
     })
   }

@@ -1,7 +1,6 @@
 // Data Service - Retrieves data from server API, falls back to defaults
 import { libraryData } from "@/data/library-data"
-import { journalData } from "@/data/journals-data"
-import { undergraduateSyllabi, postgraduateSyllabi } from "@/data/syllabi-data"
+import { defaultAdminData } from "@/lib/default-admin-data"
 
 // ===================================================
 // Server fetch helper
@@ -42,112 +41,70 @@ export async function saveToServer(key: string, data: any): Promise<boolean> {
 
 export async function getStatistics() {
   const data = await fetchFromServer("statistics")
-  return data ?? libraryData.statistics
+  return data ?? defaultAdminData.statistics
 }
 
 export async function getAnnouncements() {
   const data = await fetchFromServer("announcements")
-  return data ?? libraryData.announcements
+  return data ?? defaultAdminData.announcements
 }
 
 export async function getLibraryHours() {
   const data = await fetchFromServer("libraryHours")
-  return data ?? libraryData.hours
+  return data ?? defaultAdminData.libraryHours
 }
 
 export async function getSiteInfo() {
   const data = await fetchFromServer("siteSettings")
   return data
-    ? { ...libraryData.siteInfo, ...data }
-    : libraryData.siteInfo
+    ? { ...defaultAdminData.siteSettings, ...data }
+    : defaultAdminData.siteSettings
 }
 
 export async function getAboutData() {
   const data = await fetchFromServer("aboutData")
-  return data ?? {
-    history: libraryData.about.history,
-    activities: libraryData.about.activities,
-    staff: libraryData.about.staff,
-    facilities: libraryData.about.facilities,
-  }
+  return data ?? defaultAdminData.aboutData
 }
 
 export async function getRulesData() {
   const data = await fetchFromServer("rulesData")
-  return data ?? {
-    general: libraryData.rules.general,
-    borrowing: libraryData.rules.borrowing,
-    bookbank: libraryData.rules.bookbank,
-    practice: libraryData.rules.practice,
-  }
+  return data ?? defaultAdminData.rulesData
 }
 
 export async function getPolicyData() {
   const data = await fetchFromServer("policyData")
-  return data ?? {
-    vision: libraryData.policy.vision,
-    mission: libraryData.policy.mission,
-    objectives: libraryData.policy.objectives,
-    generalpolicy: libraryData.policy.generalpolicy,
-    finepolicy: libraryData.policy.finepolicy,
-  }
+  return data ?? defaultAdminData.policyData
 }
 
 export async function getCommitteeData() {
   const data = await fetchFromServer("committeeData")
-  return data ?? {
-    members: libraryData.members,
-    functions: libraryData.functions,
-    aboutCommittee: libraryData.aboutCommittee,
-  }
+  return data ?? defaultAdminData.committeeData
 }
 
 export async function getGalleryData() {
   const data = await fetchFromServer("galleryData")
-  return data ?? libraryData.gallery.all
+  return data ?? defaultAdminData.galleryData
 }
 
 export async function getContactData() {
-  const defaults = {
-    address: "C. Abdul Hakeem College of Engineering & Technology, Melvisharam - 632 509, Ranipet Dt., Tamil Nadu, India",
-    phone: "+91-4172-266850",
-    email: "library@cahcet.edu.in",
-    website: "https://cahcet.edu.in",
-    mapEmbed: "",
-    workingHours: "Monday - Saturday: 8:00 AM - 8:00 PM",
-    librarian: {
-      name: "A. Fahim Sheriff",
-      designation: "Librarian",
-      email: "librarian@cahcet.edu.in",
-      phone: "+91-4172-267387",
-    },
-  }
   const data = await fetchFromServer("contactData")
-  return data ?? defaults
+  return data ?? defaultAdminData.contactData
 }
 
 export async function getEResourcesData() {
   const data = await fetchFromServer("eResourcesData")
   if (data) return data
-
-  const resources: any[] = []
-  if (libraryData.eResources.delnet) {
-    resources.push({ name: "DELNET", ...libraryData.eResources.delnet })
-  }
-  return {
-    resources,
-    accessInstructions: libraryData.eResources.accessInstructions,
-  }
+  return defaultAdminData.eResourcesData
 }
 
 export async function getJournalsData() {
   const data = await fetchFromServer("journalsData")
-  return data ?? journalData
+  return data ?? defaultAdminData.journalsData
 }
 
 export async function getSyllabiData() {
   const data = await fetchFromServer("syllabiData")
-  return data ?? { undergraduate: undergraduateSyllabi, postgraduate: postgraduateSyllabi }
+  return data ?? defaultAdminData.syllabiData
 }
 
 // ===================================================

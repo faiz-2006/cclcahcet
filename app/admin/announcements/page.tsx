@@ -51,7 +51,7 @@ export default function AnnouncementsPage() {
     localStorage.setItem("announcements", JSON.stringify(announcements))
     await saveToServer("announcements", announcements)
     toast({
-      title: "Announcements Saved",
+      title: "Announcements Updated",
       description: "All announcements have been saved successfully.",
     })
   }

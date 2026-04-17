@@ -74,7 +74,7 @@ export default function JournalsPage() {
     localStorage.setItem("journalsData", JSON.stringify(journals))
     await saveToServer("journalsData", journals)
     toast({
-      title: "Journals Saved",
+      title: "Journals Updated",
       description: "All journal data has been saved successfully.",
     })
   }

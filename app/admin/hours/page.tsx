@@ -48,7 +48,7 @@ export default function HoursPage() {
     localStorage.setItem("libraryHours", JSON.stringify(hours))
     await saveToServer("libraryHours", hours)
     toast({
-      title: "Hours Saved",
+      title: "Hours Updated",
       description: "Library hours have been updated successfully.",
     })
   }

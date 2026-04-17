@@ -1,46 +1,71 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { toast } from "sonner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Save, RotateCcw, BookOpen, Newspaper, BookMarked, Users, TrendingUp } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
 import { saveToServer } from "@/lib/data-service"
 
 export default function StatisticsPage() {
-  const { toast } = useToast()
-  const [formData, setFormData] = useState({
+  type StatisticsForm = {
+    totalBooks: number
+    totalJournals: number
+    totalEBooks: number
+    dailyVisitors: number
+    activeMembers: number
+  }
+
+  const [formData, setFormData] = useState<StatisticsForm>({
     totalBooks: 0,
     totalJournals: 0,
     totalEBooks: 0,
     dailyVisitors: 0,
     activeMembers: 0,
   })
+  const [lastSavedData, setLastSavedData] = useState<StatisticsForm | null>(null)
+  const [lastEditedField, setLastEditedField] = useState<string>("")
 
   useEffect(() => {
     const savedData = localStorage.getItem("statistics")
     if (savedData) {
-      setFormData(JSON.parse(savedData))
+      const parsedData = JSON.parse(savedData) as StatisticsForm
+      setFormData(parsedData)
+      setLastSavedData(parsedData)
     } else {
-      setFormData({
+      const defaults = {
         totalBooks: libraryData.statistics.totalBooks,
         totalJournals: libraryData.statistics.totalJournals,
         totalEBooks: libraryData.statistics.totalEBooks,
         dailyVisitors: libraryData.statistics.dailyVisitors,
         activeMembers: libraryData.statistics.activeMembers,
-      })
+      }
+      setFormData(defaults)
+      setLastSavedData(defaults)
     }
   }, [])
 
   const handleSave = async () => {
+    const changedStat = statsConfig.find(
+      (stat) =>
+        !lastSavedData ||
+        formData[stat.key as keyof StatisticsForm] !== lastSavedData[stat.key as keyof StatisticsForm],
+    )
+
+    const message = lastEditedField
+      ? `Updated ${lastEditedField}`
+      : changedStat
+        ? `Updated ${changedStat.label}`
+        : "Statistics updated"
+
     localStorage.setItem("statistics", JSON.stringify(formData))
     await saveToServer("statistics", formData)
-    toast({
-      title: "Statistics Saved",
-      description: "Library statistics have been updated successfully.",
+    setLastSavedData(formData)
+    setLastEditedField("")
+    toast(message, {
+      duration: 2000,
     })
   }
 
@@ -53,11 +78,12 @@ export default function StatisticsPage() {
       activeMembers: libraryData.statistics.activeMembers,
     }
     setFormData(defaults)
+    setLastSavedData(defaults)
+    setLastEditedField("")
     localStorage.setItem("statistics", JSON.stringify(defaults))
     await saveToServer("statistics", defaults)
-    toast({
-      title: "Statistics Reset",
-      description: "Statistics have been reset to defaults.",
+    toast("Statistics have been reset to defaults.", {
+      duration: 2000,
     })
   }
 
@@ -91,7 +117,10 @@ export default function StatisticsPage() {
               <Input
                 type="number"
                 value={formData[stat.key as keyof typeof formData]}
-                onChange={(e) => setFormData({ ...formData, [stat.key]: parseInt(e.target.value) || 0 })}
+                onChange={(e) => {
+                  setFormData({ ...formData, [stat.key]: parseInt(e.target.value) || 0 })
+                  setLastEditedField(stat.label)
+                }}
                 placeholder="Enter value"
               />
             </CardContent>

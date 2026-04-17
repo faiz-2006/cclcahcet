@@ -64,7 +64,7 @@ export default function CommitteePage() {
     localStorage.setItem("committeeData", JSON.stringify(committeeData))
     await saveToServer("committeeData", committeeData)
     toast({
-      title: "Committee Data Saved",
+      title: "Committee Data Updated",
       description: "Committee information has been updated successfully.",
     })
   }

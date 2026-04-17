@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Save, RotateCcw, Plus, Trash2, ScrollText, Edit2, X, Check } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
@@ -33,6 +32,97 @@ interface RulesData {
   bookbank: string[]
   practice: string[]
 }
+
+interface RulesListProps {
+  category: keyof RulesData
+  title: string
+  description: string
+  newValue: string
+  setNewValue: (val: string) => void
+  placeholder: string
+  rules: string[]
+  onAdd: (category: keyof RulesData, value: string, setter: (val: string) => void) => void
+  onDelete: (category: keyof RulesData, index: number) => void
+}
+
+const RulesList = ({
+  category,
+  title,
+  description,
+  newValue,
+  setNewValue,
+  placeholder,
+  rules,
+  onAdd,
+  onDelete,
+}: RulesListProps) => (
+  <div className="space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ScrollText className="h-5 w-5" />
+          Add {title}
+        </CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Input
+            value={newValue}
+            onChange={(e) => setNewValue(e.target.value)}
+            placeholder={placeholder}
+            className="flex-1"
+          />
+          <Button onClick={() => onAdd(category, newValue, setNewValue)}>
+            <Plus className="mr-2 h-4 w-4" /> Add
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card>
+      <CardHeader>
+        <CardTitle>Current {title} ({rules.length})</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {rules.map((rule, index) => (
+            <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <div className="flex items-start gap-3">
+                <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-sm shrink-0">
+                  {index + 1}
+                </span>
+                <p className="text-sm">{rule}</p>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="icon" className="text-destructive shrink-0 ml-2">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Rule?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will remove this rule from the {title.toLowerCase()}.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onDelete(category, index)}>Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          ))}
+          {rules.length === 0 && (
+            <p className="text-center text-muted-foreground py-4">No rules added yet.</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+)
 
 export default function RulesPage() {
   const { toast } = useToast()
@@ -66,7 +156,7 @@ export default function RulesPage() {
     localStorage.setItem("rulesData", JSON.stringify(rulesData))
     await saveToServer("rulesData", rulesData)
     toast({
-      title: "Rules Saved",
+      title: "Rules Updated",
       description: "Library rules have been updated successfully.",
     })
   }
@@ -98,89 +188,6 @@ export default function RulesPage() {
     setRulesData({ ...rulesData, [category]: rulesData[category].filter((_, i) => i !== index) })
   }
 
-  const RulesList = ({ 
-    category, 
-    title, 
-    description,
-    newValue,
-    setNewValue,
-    placeholder
-  }: { 
-    category: keyof RulesData
-    title: string
-    description: string
-    newValue: string
-    setNewValue: (val: string) => void
-    placeholder: string
-  }) => (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ScrollText className="h-5 w-5" />
-            Add {title}
-          </CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              placeholder={placeholder}
-              className="flex-1"
-            />
-            <Button onClick={() => handleAdd(category, newValue, setNewValue)}>
-              <Plus className="mr-2 h-4 w-4" /> Add
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Current {title} ({rulesData[category].length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {rulesData[category].map((rule, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div className="flex items-start gap-3">
-                  <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-sm shrink-0">
-                    {index + 1}
-                  </span>
-                  <p className="text-sm">{rule}</p>
-                </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="icon" className="text-destructive shrink-0 ml-2">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Rule?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will remove this rule from the {title.toLowerCase()}.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(category, index)}>Delete</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            ))}
-            {rulesData[category].length === 0 && (
-              <p className="text-center text-muted-foreground py-4">No rules added yet.</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
@@ -206,6 +213,9 @@ export default function RulesPage() {
             newValue={newGeneral}
             setNewValue={setNewGeneral}
             placeholder="Enter a general rule"
+            rules={rulesData.general}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
           />
         </TabsContent>
 
@@ -217,6 +227,9 @@ export default function RulesPage() {
             newValue={newBorrowing}
             setNewValue={setNewBorrowing}
             placeholder="Enter a borrowing rule"
+            rules={rulesData.borrowing}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
           />
         </TabsContent>
 
@@ -228,6 +241,9 @@ export default function RulesPage() {
             newValue={newBookbank}
             setNewValue={setNewBookbank}
             placeholder="Enter a book bank rule"
+            rules={rulesData.bookbank}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
           />
         </TabsContent>
 
@@ -239,6 +255,9 @@ export default function RulesPage() {
             newValue={newPractice}
             setNewValue={setNewPractice}
             placeholder="Enter a best practice"
+            rules={rulesData.practice}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
           />
         </TabsContent>
       </Tabs>
