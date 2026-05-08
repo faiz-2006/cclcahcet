@@ -64,7 +64,7 @@ export default function GalleryPage() {
     localStorage.setItem("galleryData", JSON.stringify(images))
     await saveToServer("galleryData", images)
     toast({
-      title: "Gallery Saved",
+      title: "Gallery Updated",
       description: "Gallery images have been updated successfully.",
     })
   }

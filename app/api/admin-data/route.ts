@@ -1,53 +1,68 @@
 import { NextRequest, NextResponse } from "next/server"
-import fs from "fs"
-import path from "path"
+import { getSupabaseAdminClient } from "@/lib/supabase-server"
+import { defaultAdminData } from "@/lib/default-admin-data"
 
-const DATA_FILE = path.join(process.cwd(), "data", "admin-overrides.json")
+const TABLE_NAME = "admin_data"
 
-// Helper to read the JSON file
-function readData(): Record<string, any> {
-  try {
-    if (fs.existsSync(DATA_FILE)) {
-      const raw = fs.readFileSync(DATA_FILE, "utf-8")
-      return JSON.parse(raw)
-    }
-  } catch (e) {
-    console.error("Error reading admin data file:", e)
-  }
-  return {}
-}
-
-// Helper to write the JSON file
-function writeData(data: Record<string, any>) {
-  try {
-    const dir = path.dirname(DATA_FILE)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
-    }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8")
-  } catch (e) {
-    console.error("Error writing admin data file:", e)
-    throw e
+async function seedMissingKey(key: string, data: any) {
+  const supabase = getSupabaseAdminClient()
+  const { error } = await supabase.from(TABLE_NAME).upsert({ key, data })
+  if (error) {
+    throw error
   }
 }
 
 // GET /api/admin-data?key=aboutData  (or without key to get all)
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const key = searchParams.get("key")
+  try {
+    const supabase = getSupabaseAdminClient()
+    const { searchParams } = new URL(request.url)
+    const key = searchParams.get("key")
 
-  const allData = readData()
+    if (key) {
+      const { data, error } = await supabase.from(TABLE_NAME).select("data").eq("key", key).maybeSingle()
 
-  if (key) {
-    return NextResponse.json({ data: allData[key] ?? null })
+      if (error) {
+        console.error("Supabase GET key error:", error)
+        return NextResponse.json({ error: "Failed to load data" }, { status: 500 })
+      }
+
+      if (data?.data != null) {
+        return NextResponse.json({ data: data.data })
+      }
+
+      const defaultData = defaultAdminData[key]
+      if (defaultData === undefined) {
+        return NextResponse.json({ data: null })
+      }
+
+      await seedMissingKey(key, defaultData)
+      return NextResponse.json({ data: defaultData })
+    }
+
+    const { data: rows, error } = await supabase.from(TABLE_NAME).select("key,data")
+
+    if (error) {
+      console.error("Supabase GET all error:", error)
+      return NextResponse.json({ error: "Failed to load data" }, { status: 500 })
+    }
+
+    const mergedData: Record<string, any> = { ...defaultAdminData }
+    for (const row of rows ?? []) {
+      mergedData[row.key] = row.data
+    }
+
+    return NextResponse.json({ data: mergedData })
+  } catch (e) {
+    console.error("Error in GET /api/admin-data:", e)
+    return NextResponse.json({ error: "Supabase is not configured" }, { status: 500 })
   }
-
-  return NextResponse.json({ data: allData })
 }
 
 // POST /api/admin-data  body: { key: "aboutData", data: { ... } }
 export async function POST(request: NextRequest) {
   try {
+    const supabase = getSupabaseAdminClient()
     const body = await request.json()
     const { key, data } = body
 
@@ -55,9 +70,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing key" }, { status: 400 })
     }
 
-    const allData = readData()
-    allData[key] = data
-    writeData(allData)
+    const { error } = await supabase.from(TABLE_NAME).upsert({ key, data })
+
+    if (error) {
+      console.error("Supabase POST error:", error)
+      return NextResponse.json({ error: "Failed to save" }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true })
   } catch (e) {

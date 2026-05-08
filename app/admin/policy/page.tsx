@@ -2,11 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Save, RotateCcw, Plus, Trash2, FileText, Eye, Target, Scale, AlertTriangle } from "lucide-react"
+import { Save, RotateCcw, FileText, Eye, Target, Scale, AlertTriangle } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { libraryData } from "@/data/library-data"
 import { saveToServer } from "@/lib/data-service"
@@ -27,6 +24,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+import { PolicySection } from "@/components/policy-section"
 
 interface PolicyData {
   vision: string[]
@@ -45,12 +43,6 @@ export default function PolicyPage() {
     generalpolicy: [],
     finepolicy: []
   })
-  
-  const [newVision, setNewVision] = useState("")
-  const [newMission, setNewMission] = useState("")
-  const [newObjective, setNewObjective] = useState("")
-  const [newGeneralPolicy, setNewGeneralPolicy] = useState("")
-  const [newFinePolicy, setNewFinePolicy] = useState("")
 
   useEffect(() => {
     const savedData = localStorage.getItem("policyData")
@@ -71,7 +63,7 @@ export default function PolicyPage() {
     localStorage.setItem("policyData", JSON.stringify(policyData))
     await saveToServer("policyData", policyData)
     toast({
-      title: "Policy Saved",
+      title: "Policy Updated",
       description: "Library policy has been updated successfully.",
     })
   }
@@ -93,117 +85,20 @@ export default function PolicyPage() {
     })
   }
 
-  // Generic add/delete handlers
-  const handleAdd = (category: keyof PolicyData, value: string, setter: (val: string) => void) => {
+  const handleAdd = (category: keyof PolicyData, value: string) => {
     if (!value.trim()) return
-    setPolicyData({ ...policyData, [category]: [...policyData[category], value] })
-    setter("")
+    setPolicyData(prevData => ({
+      ...prevData,
+      [category]: [...prevData[category], value],
+    }))
   }
 
   const handleDelete = (category: keyof PolicyData, index: number) => {
-    setPolicyData({ ...policyData, [category]: policyData[category].filter((_, i) => i !== index) })
+    setPolicyData(prevData => ({
+      ...prevData,
+      [category]: prevData[category].filter((_, i) => i !== index),
+    }))
   }
-
-  const PolicySection = ({ 
-    category, 
-    title, 
-    description,
-    icon: Icon,
-    newValue,
-    setNewValue,
-    placeholder,
-    useTextarea = false
-  }: { 
-    category: keyof PolicyData
-    title: string
-    description: string
-    icon: React.ElementType
-    newValue: string
-    setNewValue: (val: string) => void
-    placeholder: string
-    useTextarea?: boolean
-  }) => (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Icon className="h-5 w-5" />
-            Add {title}
-          </CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {useTextarea ? (
-            <div className="space-y-2">
-              <Textarea
-                value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
-                placeholder={placeholder}
-                rows={3}
-              />
-              <Button onClick={() => handleAdd(category, newValue, setNewValue)}>
-                <Plus className="mr-2 h-4 w-4" /> Add
-              </Button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <Input
-                value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
-                placeholder={placeholder}
-                className="flex-1"
-              />
-              <Button onClick={() => handleAdd(category, newValue, setNewValue)}>
-                <Plus className="mr-2 h-4 w-4" /> Add
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Current {title} ({policyData[category].length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {policyData[category].map((item, index) => (
-              <div key={index} className="flex items-start justify-between p-3 bg-muted rounded-lg">
-                <div className="flex items-start gap-3 flex-1">
-                  <span className="bg-primary text-primary-foreground w-6 h-6 rounded-full flex items-center justify-center text-sm shrink-0 mt-0.5">
-                    {index + 1}
-                  </span>
-                  <p className="text-sm">{item}</p>
-                </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="icon" className="text-destructive shrink-0 ml-2">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Item?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will remove this item from {title.toLowerCase()}.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(category, index)}>Delete</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            ))}
-            {policyData[category].length === 0 && (
-              <p className="text-center text-muted-foreground py-4">No items added yet.</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
 
   return (
     <div className="space-y-6">
@@ -229,8 +124,9 @@ export default function PolicyPage() {
             title="Vision Statement"
             description="Library's vision for the future"
             icon={Eye}
-            newValue={newVision}
-            setNewValue={setNewVision}
+            items={policyData.vision}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
             placeholder="Enter vision statement"
             useTextarea
           />
@@ -242,8 +138,9 @@ export default function PolicyPage() {
             title="Mission Statement"
             description="Library's mission and purpose"
             icon={Target}
-            newValue={newMission}
-            setNewValue={setNewMission}
+            items={policyData.mission}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
             placeholder="Enter mission statement"
             useTextarea
           />
@@ -255,8 +152,9 @@ export default function PolicyPage() {
             title="Objectives"
             description="Library's objectives and goals"
             icon={FileText}
-            newValue={newObjective}
-            setNewValue={setNewObjective}
+            items={policyData.objectives}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
             placeholder="Enter an objective"
           />
         </TabsContent>
@@ -267,8 +165,9 @@ export default function PolicyPage() {
             title="General Policies"
             description="General library policies and guidelines"
             icon={Scale}
-            newValue={newGeneralPolicy}
-            setNewValue={setNewGeneralPolicy}
+            items={policyData.generalpolicy}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
             placeholder="Enter a general policy"
           />
         </TabsContent>
@@ -279,8 +178,9 @@ export default function PolicyPage() {
             title="Fine Policies"
             description="Policies regarding fines and penalties"
             icon={AlertTriangle}
-            newValue={newFinePolicy}
-            setNewValue={setNewFinePolicy}
+            items={policyData.finepolicy}
+            onAdd={handleAdd}
+            onDelete={handleDelete}
             placeholder="Enter a fine policy"
           />
         </TabsContent>
@@ -314,3 +214,4 @@ export default function PolicyPage() {
     </div>
   )
 }
+

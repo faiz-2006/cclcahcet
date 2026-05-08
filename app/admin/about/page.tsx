@@ -84,7 +84,7 @@ export default function AboutPage() {
     localStorage.setItem("aboutData", JSON.stringify(aboutData))
     await saveToServer("aboutData", aboutData)
     toast({
-      title: "About Data Saved",
+      title: "About Data Updated",
       description: "About section has been updated successfully.",
     })
   }

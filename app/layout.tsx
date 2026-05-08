@@ -7,6 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { LibrarySidebar } from "@/components/library-sidebar"
 import { TopMarquee } from "@/components/top-marquee"
 import { Toaster } from "@/components/ui/toaster"
+import { Toaster as SonnerToaster } from "@/components/ui/sonner"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -35,12 +36,9 @@ export default function RootLayout({
             </div>
           </SidebarProvider>
           <Toaster />
+          <SonnerToaster />
         {/* </ThemeProvider> */}
       </body>
     </html>
   )
 }
-
-
-
-import './globals.css'

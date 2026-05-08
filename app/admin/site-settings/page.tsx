@@ -39,7 +39,7 @@ export default function SiteSettingsPage() {
     localStorage.setItem("siteSettings", JSON.stringify(formData))
     await saveToServer("siteSettings", formData)
     toast({
-      title: "Settings Saved",
+      title: "Settings Updated",
       description: "Site settings have been updated successfully.",
     })
   }
